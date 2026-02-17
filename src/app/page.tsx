@@ -1,4 +1,14 @@
-export default function Home() {
+import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { AuthButtons } from "@/components/auth/AuthButtons";
+
+export default async function Home() {
+  const supabase = await createServerSupabaseClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  const isAuthenticated = !!user;
+
   return (
     <main className="space-y-8">
       <header className="space-y-2">
@@ -15,16 +25,7 @@ export default function Home() {
       </header>
 
       <section className="space-y-4">
-        <button
-          type="button"
-          className="inline-flex w-full items-center justify-center rounded-xl bg-zinc-900 px-4 py-3 text-sm font-medium text-zinc-50 shadow-sm transition hover:bg-zinc-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 focus-visible:ring-offset-2 focus-visible:ring-offset-background dark:bg-zinc-50 dark:text-zinc-950 dark:hover:bg-zinc-200 sm:w-auto"
-        >
-          Login to continue
-        </button>
-        <p className="text-xs text-zinc-500">
-          Authentication is not wired up yet. This button is a placeholder for a
-          future login flow.
-        </p>
+        <AuthButtons userEmail={user?.email ?? null} />
       </section>
 
       <section className="grid gap-3 rounded-xl border border-dashed border-zinc-200 bg-zinc-50/80 p-4 text-xs text-zinc-600 dark:border-zinc-800 dark:bg-zinc-950/40 dark:text-zinc-400 sm:grid-cols-2">
@@ -33,8 +34,8 @@ export default function Home() {
             What&apos;s next?
           </p>
           <ul className="mt-1 list-disc space-y-1 pl-4">
-            <li>Add authentication (e.g. OAuth or email link)</li>
             <li>Design bookmark collections and tags</li>
+            <li>Add search and filters</li>
           </ul>
         </div>
         <div>
@@ -43,9 +44,32 @@ export default function Home() {
           </p>
           <ul className="mt-1 list-disc space-y-1 pl-4">
             <li>Next.js App Router (TypeScript)</li>
+            <li>Supabase Auth (Google OAuth only)</li>
             <li>Tailwind CSS v4</li>
           </ul>
         </div>
+      </section>
+
+      <section className="mt-4 space-y-3 rounded-xl border border-zinc-200 bg-zinc-50/80 p-4 text-xs dark:border-zinc-800 dark:bg-zinc-950/40">
+        <p className="font-medium text-zinc-900 dark:text-zinc-50">
+          Bookmark workspace
+        </p>
+        {isAuthenticated ? (
+          <div className="space-y-2 text-zinc-700 dark:text-zinc-200">
+            <p>
+              This is your protected bookmark area. Only authenticated users can
+              see this section.
+            </p>
+            <p className="text-[0.7rem] text-zinc-500 dark:text-zinc-400">
+              Next steps: hook this up to a Supabase database table and render
+              the user&apos;s saved bookmarks.
+            </p>
+          </div>
+        ) : (
+          <p className="text-zinc-500 dark:text-zinc-400">
+            Sign in with Google to unlock your bookmark workspace.
+          </p>
+        )}
       </section>
     </main>
   );
