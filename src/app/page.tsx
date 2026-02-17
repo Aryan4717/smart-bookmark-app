@@ -1,6 +1,7 @@
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { AuthButtons } from "@/components/auth/AuthButtons";
 import { BookmarkForm } from "@/components/bookmarks/BookmarkForm";
+import { RealtimeBookmarks } from "@/components/bookmarks/RealtimeBookmarks";
 import { createBookmark } from "./actions/bookmarks";
 
 type Bookmark = {
@@ -81,35 +82,10 @@ export default async function Home() {
             <BookmarkForm action={createBookmark} />
 
             <div className="space-y-2 rounded-xl border border-zinc-200 bg-zinc-50/80 p-4 dark:border-zinc-800 dark:bg-zinc-950/40">
-              {bookmarks.length === 0 ? (
-                <p className="text-zinc-500 dark:text-zinc-400">
-                  No bookmarks yet. Add your first one above.
-                </p>
-              ) : (
-                <ul className="space-y-2">
-                  {bookmarks.map((bookmark) => (
-                    <li
-                      key={bookmark.id}
-                      className="flex flex-col gap-1 rounded-lg border border-zinc-200 bg-white/80 p-3 text-xs shadow-sm dark:border-zinc-800 dark:bg-zinc-900/60"
-                    >
-                      <p className="text-xs font-medium text-zinc-900 dark:text-zinc-50">
-                        {bookmark.title}
-                      </p>
-                      <a
-                        href={bookmark.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="truncate text-[0.7rem] text-zinc-500 underline-offset-2 hover:underline dark:text-zinc-400"
-                      >
-                        {bookmark.url}
-                      </a>
-                      <p className="text-[0.65rem] text-zinc-400">
-                        {new Date(bookmark.created_at).toLocaleString()}
-                      </p>
-                    </li>
-                  ))}
-                </ul>
-              )}
+              <RealtimeBookmarks
+                initialBookmarks={bookmarks}
+                userId={user!.id}
+              />
             </div>
           </>
         ) : (

@@ -29,7 +29,7 @@ export default function RootLayout({
       >
         <div className="flex min-h-screen items-center justify-center px-4">
           <div className="w-full max-w-2xl rounded-2xl border border-zinc-200 bg-white/80 p-8 shadow-sm backdrop-blur dark:border-zinc-800 dark:bg-zinc-950/80">
-            {children}
+        {children}
           </div>
         </div>
       </body>
