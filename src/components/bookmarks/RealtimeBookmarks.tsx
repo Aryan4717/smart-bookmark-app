@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { createBrowserSupabaseClient } from "@/lib/supabase/client";
+import { deleteBookmark } from "@/app/actions/bookmarks";
 
 type Bookmark = {
   id: string;
@@ -20,6 +21,7 @@ export function RealtimeBookmarks({
   userId,
 }: RealtimeBookmarksProps) {
   const [bookmarks, setBookmarks] = useState<Bookmark[]>(initialBookmarks);
+  const [deletingIds, setDeletingIds] = useState<Set<string>>(new Set());
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -32,6 +34,26 @@ export function RealtimeBookmarks({
       second: '2-digit',
       hour12: false
     });
+  };
+
+  const handleDelete = async (bookmarkId: string) => {
+    setDeletingIds(prev => new Set(prev).add(bookmarkId));
+    
+    try {
+      const result = await deleteBookmark(bookmarkId);
+      if (result.error) {
+        console.error('Failed to delete bookmark:', result.error);
+        // The real-time subscription will handle the UI update on successful deletion
+      }
+    } catch (error) {
+      console.error('Error deleting bookmark:', error);
+    } finally {
+      setDeletingIds(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(bookmarkId);
+        return newSet;
+      });
+    }
   };
 
   useEffect(() => {
@@ -88,27 +110,45 @@ export function RealtimeBookmarks({
 
   return (
     <ul className="space-y-2">
-      {bookmarks.map((bookmark) => (
-        <li
-          key={bookmark.id}
-          className="flex flex-col gap-1 rounded-lg border border-zinc-200 bg-white/80 p-3 text-xs shadow-sm dark:border-zinc-800 dark:bg-zinc-900/60"
-        >
-          <p className="text-xs font-medium text-zinc-900 dark:text-zinc-50">
-            {bookmark.title}
-          </p>
-          <a
-            href={bookmark.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="truncate text-[0.7rem] text-zinc-500 underline-offset-2 hover:underline dark:text-zinc-400"
+      {bookmarks.map((bookmark) => {
+        const isDeleting = deletingIds.has(bookmark.id);
+        
+        return (
+          <li
+            key={bookmark.id}
+            className="flex flex-col gap-1 rounded-lg border border-zinc-200 bg-white/80 p-3 text-xs shadow-sm dark:border-zinc-800 dark:bg-zinc-900/60"
           >
-            {bookmark.url}
-          </a>
-          <p className="text-[0.65rem] text-zinc-400">
-            {formatDate(bookmark.created_at)}
-          </p>
-        </li>
-      ))}
+            <div className="flex items-start justify-between">
+              <p className="text-xs font-medium text-zinc-900 dark:text-zinc-50">
+                {bookmark.title}
+              </p>
+              <button
+                onClick={() => handleDelete(bookmark.id)}
+                disabled={isDeleting}
+                className="text-red-500 hover:text-red-700 disabled:opacity-50 disabled:cursor-not-allowed text-[0.7rem]"
+                aria-label="Delete bookmark"
+              >
+                {isDeleting ? (
+                  <span className="animate-pulse">Deleting...</span>
+                ) : (
+                  'Delete'
+                )}
+              </button>
+            </div>
+            <a
+              href={bookmark.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="truncate text-[0.7rem] text-zinc-500 underline-offset-2 hover:underline dark:text-zinc-400"
+            >
+              {bookmark.url}
+            </a>
+            <p className="text-[0.65rem] text-zinc-400">
+              {formatDate(bookmark.created_at)}
+            </p>
+          </li>
+        );
+      })}
     </ul>
   );
 }

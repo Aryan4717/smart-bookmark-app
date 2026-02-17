@@ -34,4 +34,28 @@ export async function createBookmark(formData: FormData) {
   return { error: null };
 }
 
+export async function deleteBookmark(bookmarkId: string) {
+  const supabase = await createServerSupabaseClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return { error: "You must be signed in to delete bookmarks." };
+  }
+
+  const { error } = await supabase
+    .from("bookmarks")
+    .delete()
+    .eq("id", bookmarkId)
+    .eq("user_id", user.id); // RLS ensures only owner can delete
+
+  if (error) {
+    return { error: error.message };
+  }
+
+  revalidatePath("/");
+  return { error: null };
+}
+
 
