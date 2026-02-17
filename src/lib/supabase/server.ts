@@ -12,20 +12,30 @@ export async function createServerSupabaseClient() {
         get(name: string) {
           return cookieStore.get(name)?.value;
         },
+        // Cookie set/remove operations are only allowed in Server Actions and Route Handlers
+        // For server components, we only provide read access to cookies
         set(name: string, value: string, options: CookieOptions) {
-          cookieStore.set({
-            name,
-            value,
-            ...options,
-          });
+          try {
+            cookieStore.set({
+              name,
+              value,
+              ...options,
+            });
+          } catch (error) {
+            // Silently fail in server components - cookie operations should be done in Server Actions
+          }
         },
         remove(name: string, options: CookieOptions) {
-          cookieStore.set({
-            name,
-            value: "",
-            ...options,
-            maxAge: 0,
-          });
+          try {
+            cookieStore.set({
+              name,
+              value: "",
+              ...options,
+              maxAge: 0,
+            });
+          } catch (error) {
+            // Silently fail in server components - cookie operations should be done in Server Actions
+          }
         },
       },
     }
