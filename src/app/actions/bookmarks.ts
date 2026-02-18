@@ -20,18 +20,32 @@ export async function createBookmark(formData: FormData) {
     return { error: "You must be signed in to add bookmarks." };
   }
 
-  const { error } = await supabase.from("bookmarks").insert({
-    title,
-    url,
-    user_id: user.id,
-  });
+  const { data, error } = await supabase
+    .from("bookmarks")
+    .insert({
+      title,
+      url,
+      user_id: user.id,
+    })
+    .select("id, title, url, created_at, user_id")
+    .single();
 
   if (error) {
     return { error: error.message };
   }
 
   revalidatePath("/");
-  return { error: null };
+  return {
+    error: null,
+    bookmark: data
+      ? {
+          id: data.id,
+          title: data.title,
+          url: data.url,
+          created_at: data.created_at,
+        }
+      : undefined,
+  };
 }
 
 export async function deleteBookmark(bookmarkId: string) {
@@ -57,5 +71,4 @@ export async function deleteBookmark(bookmarkId: string) {
   revalidatePath("/");
   return { error: null };
 }
-
 

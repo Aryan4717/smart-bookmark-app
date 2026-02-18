@@ -44,6 +44,8 @@ export function RealtimeBookmarks({
       if (result.error) {
         console.error('Failed to delete bookmark:', result.error);
         // The real-time subscription will handle the UI update on successful deletion
+      } else {
+        setBookmarks((current) => current.filter((b) => b.id !== bookmarkId));
       }
     } catch (error) {
       console.error('Error deleting bookmark:', error);
@@ -99,8 +101,26 @@ export function RealtimeBookmarks({
         }
       });
 
+    const handleCreated = (e: Event) => {
+      const custom = e as CustomEvent<Bookmark>;
+      const created = custom.detail;
+      if (!created) return;
+      setBookmarks((current) => {
+        const exists = current.some((b) => b.id === created.id);
+        if (exists) return current;
+        return [created, ...current];
+      });
+    };
+
+    if (typeof window !== "undefined") {
+      window.addEventListener("bookmark:created", handleCreated as EventListener);
+    }
+
     return () => {
       supabase.removeChannel(channel);
+      if (typeof window !== "undefined") {
+        window.removeEventListener("bookmark:created", handleCreated as EventListener);
+      }
     };
   }, [userId]);
 
@@ -156,5 +176,4 @@ export function RealtimeBookmarks({
     </ul>
   );
 }
-
 

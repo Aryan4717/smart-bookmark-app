@@ -26,9 +26,22 @@ export function BookmarkForm({ action }: BookmarkFormProps) {
 
   async function handleAction(formData: FormData) {
     setError(null);
-    const result = (await action(formData)) as { error?: string | null } | void;
+    const result = (await action(formData)) as {
+      error?: string | null;
+      bookmark?: { id: string; title: string; url: string; created_at: string };
+    } | void;
     if (result && result.error) {
       setError(result.error);
+      return;
+    }
+    if (result && result.bookmark) {
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(
+          new CustomEvent("bookmark:created", {
+            detail: result.bookmark,
+          })
+        );
+      }
     }
   }
 
@@ -84,5 +97,4 @@ export function BookmarkForm({ action }: BookmarkFormProps) {
     </form>
   );
 }
-
 
