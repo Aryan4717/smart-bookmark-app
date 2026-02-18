@@ -304,7 +304,9 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - [Supabase](https://supabase.com) for the real-time database and auth
 - [Tailwind CSS](https://tailwindcss.com) for the utility-first CSS framework
 - [Vercel](https://vercel.com) for seamless deployment
+<img width="1018" height="697" alt="demo1" src="https://github.com/user-attachments/assets/2a74f91b-955e-4cd5-9805-bab3609bdbab" />
 
----
+---<img width="797" height="799" alt="demo2" src="https://github.com/user-attachments/assets/2534bd7b-86f7-4e2e-bc8d-345e0eda45e6" />
+
 
 Built with ❤️ using Next.js and Supabase
